@@ -2,6 +2,8 @@ package engine
 
 import "testing"
 
+const ticksForDeterminismTest = 20
+
 func TestDeterministicEngine(t *testing.T) {
 	e1 := New()
 	e2 := New()
@@ -15,14 +17,10 @@ func TestDeterministicEngine(t *testing.T) {
 	}
 
 	if c1.X != c2.X || c1.Y != c2.Y || c1.Speed != c2.Speed {
-		t.Fatalf(
-			"initial engine state differs: %+v vs %+v",
-			c1,
-			c2,
-		)
+		t.Fatalf("initial engine state differs: %+v vs %+v", c1, c2)
 	}
 
-	for i := 0; i < 20; i++ {
+	for i := 0; i < ticksForDeterminismTest; i++ {
 		e1.Tick()
 		e2.Tick()
 	}
@@ -34,11 +32,11 @@ func TestDeterministicEngine(t *testing.T) {
 		t.Fatalf("expected car-1 to exist after ticks")
 	}
 
-	if f1.Y != f2.Y {
+	if f1.X != f2.X || f1.Y != f2.Y || f1.Speed != f2.Speed {
 		t.Fatalf(
-			"engine is not deterministic: got %d and %d",
-			f1.Y,
-			f2.Y,
+			"engine state is not deterministic after ticks: %+v vs %+v",
+			f1,
+			f2,
 		)
 	}
 }

@@ -11,12 +11,16 @@ import (
 func Advance(state *State, bus *eventbus.Bus, store *eventstore.Store) {
 	// Increment tick
 	state.TickNumber++
-	
+
 	// Emit TickAdvanced event
 	tickEvent := events.NewTickAdvanced(state.TickNumber)
-	bus.Publish(tickEvent)
-	store.Append(tickEvent)
-	
+	if bus != nil {
+		bus.Publish(tickEvent)
+	}
+	if store != nil {
+		store.Append(tickEvent)
+	}
+
 	// Move each car and emit events
 	// Sort car IDs to ensure deterministic event generation order
 	carIDs := make([]string, 0, len(state.Cars))
@@ -30,13 +34,17 @@ func Advance(state *State, bus *eventbus.Bus, store *eventstore.Store) {
 		// Record old position
 		oldX := car.X
 		oldY := car.Y
-		
+
 		// Apply movement
 		applyMovement(car)
-		
+
 		// Emit CarMoved event
 		moveEvent := events.NewCarMoved(car.ID, oldX, oldY, car.X, car.Y)
-		bus.Publish(moveEvent)
-		store.Append(moveEvent)
+		if bus != nil {
+			bus.Publish(moveEvent)
+		}
+		if store != nil {
+			store.Append(moveEvent)
+		}
 	}
 }

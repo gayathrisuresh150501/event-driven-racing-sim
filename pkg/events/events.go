@@ -39,22 +39,32 @@ type CarMoved struct {
 }
 
 // NewTickAdvanced creates a new TickAdvanced event
-func NewTickAdvanced(tickNumber int) *TickAdvanced {
+// If timestamps is provided, the first one is used. Otherwise, time.Now() is used.
+func NewTickAdvanced(tickNumber int, timestamps ...time.Time) *TickAdvanced {
+	ts := time.Now()
+	if len(timestamps) > 0 {
+		ts = timestamps[0]
+	}
 	return &TickAdvanced{
 		BaseEvent: BaseEvent{
 			Type: "TickAdvanced",
-			Time: time.Now(),
+			Time: ts,
 		},
 		TickNumber: tickNumber,
 	}
 }
 
 // NewCarMoved creates a new CarMoved event
-func NewCarMoved(carID string, oldX, oldY, newX, newY int) *CarMoved {
+// If timestamps is provided, the first one is used. Otherwise, time.Now() is used.
+func NewCarMoved(carID string, oldX, oldY, newX, newY int, timestamps ...time.Time) *CarMoved {
+	ts := time.Now()
+	if len(timestamps) > 0 {
+		ts = timestamps[0]
+	}
 	return &CarMoved{
 		BaseEvent: BaseEvent{
 			Type: "CarMoved",
-			Time: time.Now(),
+			Time: ts,
 		},
 		CarID: carID,
 		OldX:  oldX,

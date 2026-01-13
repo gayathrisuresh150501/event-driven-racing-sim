@@ -32,7 +32,7 @@ func (s *Store) Append(event events.Event) {
 func (s *Store) All() []events.Event {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	// Return a copy
 	copied := make([]events.Event, len(s.events))
 	copy(copied, s.events)
@@ -46,15 +46,16 @@ func (s *Store) Count() int {
 	return len(s.events)
 }
 
-// Since returns all events after a given index
+// Since returns all events starting at the given index (inclusive).
+// Returns an empty slice if index is out of bounds (negative or >= event count).
 func (s *Store) Since(index int) []events.Event {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	if index < 0 || index >= len(s.events) {
 		return []events.Event{}
 	}
-	
+
 	copied := make([]events.Event, len(s.events)-index)
 	copy(copied, s.events[index:])
 	return copied

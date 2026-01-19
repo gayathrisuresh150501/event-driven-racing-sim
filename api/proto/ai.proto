@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package racing;
+
+option go_package = "github.com/gayathrisuresh150501/event-driven-racing-sim/api/proto/racing";
+
+// AIService provides AI decision-making for racing cars
+service AIService {
+  // Decide returns the AI's suggested action for a car
+  rpc Decide(DecideRequest) returns (DecideResponse);
+
+  // GetInfo returns information about this AI service
+  rpc GetInfo(GetInfoRequest) returns (GetInfoResponse);
+}
+
+message DecideRequest {
+  Car car = 1;
+  repeated Car all_cars = 2;
+  int32 tick_number = 3;
+  int64 timeout_ms = 4;  // Timeout in milliseconds
+}
+
+message DecideResponse {
+  string car_id = 1;
+  int32 suggested_delta_y = 2;
+  double confidence = 3;
+  string error = 4;  // Empty if no error
+}
+
+message Car {
+  string id = 1;
+  int32 x = 2;
+  int32 y = 3;
+  int32 speed = 4;
+}
+
+message GetInfoRequest {}
+
+message GetInfoResponse {
+  string name = 1;
+  string version = 2;
+  string description = 3;
+}

@@ -104,7 +104,7 @@ func TestReplayDeterminism(t *testing.T) {
 		t.Errorf("replay did not produce identical state: %v", err)
 	}
 
-	t.Logf("✅ Replay succeeded: original and replayed states are identical after %d ticks", ticksForDeterminismTest)
+	t.Logf(" Replay succeeded: original and replayed states are identical after %d ticks", ticksForDeterminismTest)
 }
 
 // TestMultipleReplay verifies replay is deterministic

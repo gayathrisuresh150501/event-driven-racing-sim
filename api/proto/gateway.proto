@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package racing;
+
+option go_package = "github.com/gayathrisuresh150501/event-driven-racing-sim/api/proto/racing";
+
+// GatewayService is the client-facing API that orchestrates engine and AI services
+service GatewayService {
+  // StartRace creates a race with AI-controlled cars
+  rpc StartRace(StartRaceRequest) returns (StartRaceResponse);
+
+  // RunRace executes the race for a specified number of ticks
+  rpc RunRace(RunRaceRequest) returns (stream RaceUpdate);
+
+  // GetRaceResults returns final race standings
+  rpc GetRaceResults(GetRaceResultsRequest) returns (GetRaceResultsResponse);
+}
+
+message StartRaceRequest {
+  int32 num_cars = 1;
+  repeated AIConfig ai_configs = 2;
+}
+
+message AIConfig {
+  string car_id = 1;
+  string ai_type = 2;  // "rulebot", "random", etc.
+  string ai_service_address = 3;  // Optional: specific AI service address
+}
+
+message StartRaceResponse {
+  string race_id = 1;
+  repeated string car_ids = 2;
+  string message = 3;
+}
+
+message RunRaceRequest {
+  string race_id = 1;
+  int32 num_ticks = 2;
+}
+
+message RaceUpdate {
+  int32 tick_number = 1;
+  repeated CarStanding standings = 2;
+  string event_type = 3;  // "tick", "completed"
+}
+
+message CarStanding {
+  int32 rank = 1;
+  string car_id = 2;
+  int32 position_y = 3;
+  int32 speed = 4;
+  string ai_name = 5;
+}
+
+message GetRaceResultsRequest {
+  string race_id = 1;
+}
+
+message GetRaceResultsResponse {
+  string race_id = 1;
+  int32 total_ticks = 2;
+  repeated CarStanding final_standings = 3;
+  int32 total_events = 4;
+}

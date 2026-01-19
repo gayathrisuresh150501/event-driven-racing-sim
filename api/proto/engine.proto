@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package racing;
+
+option go_package = "github.com/gayathrisuresh150501/event-driven-racing-sim/api/proto/racing";
+
+// EngineService manages the racing simulation engine
+service EngineService {
+  // CreateRace initializes a new race with specified cars
+  rpc CreateRace(CreateRaceRequest) returns (CreateRaceResponse);
+
+  // Tick advances the simulation by one step
+  rpc Tick(TickRequest) returns (TickResponse);
+
+  // GetState returns the current race state
+  rpc GetState(GetStateRequest) returns (GetStateResponse);
+
+  // StreamEvents streams all events from the engine
+  rpc StreamEvents(StreamEventsRequest) returns (stream Event);
+
+  // RegisterAI registers an AI service endpoint for a car
+  rpc RegisterAI(RegisterAIRequest) returns (RegisterAIResponse);
+}
+
+message CreateRaceRequest {
+  repeated string car_ids = 1;
+}
+
+message CreateRaceResponse {
+  string race_id = 1;
+}
+
+message TickRequest {
+  string race_id = 1;
+  int32 num_ticks = 2;  // Number of ticks to advance (default 1)
+}
+
+message TickResponse {
+  int32 current_tick = 1;
+  repeated CarState cars = 2;
+}
+
+message GetStateRequest {
+  string race_id = 1;
+}
+
+message GetStateResponse {
+  int32 current_tick = 1;
+  repeated CarState cars = 2;
+}
+
+message StreamEventsRequest {
+  string race_id = 1;
+  int32 from_tick = 2;  // Start streaming from this tick (0 = all events)
+}
+
+message RegisterAIRequest {
+  string race_id = 1;
+  string car_id = 2;
+  string ai_service_address = 3;  // gRPC address of AI service
+}
+
+message RegisterAIResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message CarState {
+  string id = 1;
+  int32 x = 2;
+  int32 y = 3;
+  int32 speed = 4;
+}
+
+message Event {
+  string event_type = 1;  // "TickAdvanced" or "CarMoved"
+  int64 timestamp = 2;
+
+  // TickAdvanced fields
+  int32 tick_number = 3;
+
+  // CarMoved fields
+  string car_id = 4;
+  int32 old_x = 5;
+  int32 old_y = 6;
+  int32 new_x = 7;
+  int32 new_y = 8;
+}

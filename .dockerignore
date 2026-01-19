@@ -1,0 +1,12 @@
+# Don't include these in Docker images
+.git
+.gitignore
+*.md
+test/
+scripts/
+.vscode/
+.idea/
+*.exe
+*.test
+tmp/
+*.log

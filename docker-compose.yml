@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # Engine Server - manages race simulation
+  engine:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.engine
+    container_name: racing-engine
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+    networks:
+      - racing-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # AI Service 1 - RuleBot Alpha
+  ai-service-1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ai
+    container_name: racing-ai-1
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+      - AI_NAME=RuleBot-Alpha
+    networks:
+      - racing-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # AI Service 2 - RuleBot Bravo
+  ai-service-2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ai
+    container_name: racing-ai-2
+    ports:
+      - "8083:8081"
+    environment:
+      - PORT=8081
+      - AI_NAME=RuleBot-Bravo
+    networks:
+      - racing-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # Gateway - client-facing API
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gateway
+    container_name: racing-gateway
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+      - ENGINE_ADDRESS=http://engine:8080
+      - AI_ADDRESS_1=http://ai-service-1:8081
+      - AI_ADDRESS_2=http://ai-service-2:8081
+    networks:
+      - racing-network
+    depends_on:
+      engine:
+        condition: service_healthy
+      ai-service-1:
+        condition: service_healthy
+      ai-service-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  racing-network:
+    driver: bridge

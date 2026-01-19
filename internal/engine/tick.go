@@ -18,7 +18,9 @@ func Advance(state *State, bus *eventbus.Bus, store *eventstore.Store) {
 		bus.Publish(tickEvent)
 	}
 	if store != nil {
-		store.Append(tickEvent)
+		if err := store.Append(tickEvent); err != nil {
+			panic(err) // Should never happen with valid events
+		}
 	}
 
 	// Move each car and emit events
@@ -38,13 +40,15 @@ func Advance(state *State, bus *eventbus.Bus, store *eventstore.Store) {
 		// Apply movement
 		applyMovement(car)
 
-		// Emit CarMoved event
-		moveEvent := events.NewCarMoved(car.ID, oldX, oldY, car.X, car.Y)
+		// Emit CarMoved event using the map key as canonical ID
+		moveEvent := events.NewCarMoved(id, oldX, oldY, car.X, car.Y)
 		if bus != nil {
 			bus.Publish(moveEvent)
 		}
 		if store != nil {
-			store.Append(moveEvent)
+			if err := store.Append(moveEvent); err != nil {
+				panic(err) // Should never happen with valid events
+			}
 		}
 	}
 }

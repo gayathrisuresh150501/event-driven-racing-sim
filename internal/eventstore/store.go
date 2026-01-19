@@ -1,6 +1,8 @@
 package eventstore
 
 import (
+	"fmt"
+	"reflect"
 	"sync"
 
 	"github.com/gayathrisuresh150501/event-driven-racing-sim/pkg/events"
@@ -21,10 +23,15 @@ func New() *Store {
 
 // Append adds an event to the store
 // Events are immutable once added
-func (s *Store) Append(event events.Event) {
+// Returns an error if event is nil (guards against typed-nil interface values)
+func (s *Store) Append(event events.Event) error {
+	if event == nil || (reflect.ValueOf(event).Kind() == reflect.Ptr && reflect.ValueOf(event).IsNil()) {
+		return fmt.Errorf("cannot append nil event")
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.events = append(s.events, event)
+	return nil
 }
 
 // All returns all events in order

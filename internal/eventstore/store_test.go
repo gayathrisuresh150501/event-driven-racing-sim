@@ -8,13 +8,17 @@ import (
 
 func TestStoreAppend(t *testing.T) {
 	store := New()
-	
+
 	event1 := events.NewTickAdvanced(1)
 	event2 := events.NewCarMoved("car-1", 0, 0, 0, 1)
-	
-	store.Append(event1)
-	store.Append(event2)
-	
+
+	if err := store.Append(event1); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := store.Append(event2); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	if store.Count() != 2 {
 		t.Fatalf("expected 2 events, got %d", store.Count())
 	}
@@ -22,10 +26,14 @@ func TestStoreAppend(t *testing.T) {
 
 func TestStoreAll(t *testing.T) {
 	store := New()
-	
-	store.Append(events.NewTickAdvanced(1))
-	store.Append(events.NewCarMoved("car-1", 0, 0, 0, 1))
-	
+
+	if err := store.Append(events.NewTickAdvanced(1)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := store.Append(events.NewCarMoved("car-1", 0, 0, 0, 1)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	all := store.All()
 	
 	if len(all) != 2 {
@@ -43,10 +51,14 @@ func TestStoreAll(t *testing.T) {
 
 func TestStoreImmutability(t *testing.T) {
 	store := New()
-	
-	store.Append(events.NewTickAdvanced(1))
-	store.Append(events.NewTickAdvanced(2))
-	
+
+	if err := store.Append(events.NewTickAdvanced(1)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := store.Append(events.NewTickAdvanced(2)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	// Get events
 	events1 := store.All()
 	
@@ -73,11 +85,17 @@ func TestStoreImmutability(t *testing.T) {
 
 func TestStoreSince(t *testing.T) {
 	store := New()
-	
-	store.Append(events.NewTickAdvanced(1))
-	store.Append(events.NewTickAdvanced(2))
-	store.Append(events.NewTickAdvanced(3))
-	
+
+	if err := store.Append(events.NewTickAdvanced(1)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := store.Append(events.NewTickAdvanced(2)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := store.Append(events.NewTickAdvanced(3)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	since := store.Since(1)
 	
 	if len(since) != 2 {
@@ -97,17 +115,46 @@ func TestStoreSince(t *testing.T) {
 
 func TestStoreClear(t *testing.T) {
 	store := New()
-	
-	store.Append(events.NewTickAdvanced(1))
-	store.Append(events.NewTickAdvanced(2))
-	
+
+	if err := store.Append(events.NewTickAdvanced(1)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := store.Append(events.NewTickAdvanced(2)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
 	if store.Count() != 2 {
 		t.Fatalf("expected 2 events before clear, got %d", store.Count())
 	}
-	
+
 	store.Clear()
-	
+
 	if store.Count() != 0 {
 		t.Errorf("expected 0 events after clear, got %d", store.Count())
+	}
+}
+
+func TestStoreAppendNil(t *testing.T) {
+	store := New()
+
+	// Test appending nil event
+	err := store.Append(nil)
+	if err == nil {
+		t.Fatal("expected error when appending nil event, got nil")
+	}
+
+	if store.Count() != 0 {
+		t.Errorf("expected 0 events after failed append, got %d", store.Count())
+	}
+
+	// Test appending typed-nil event
+	var nilEvent *events.TickAdvanced
+	err = store.Append(nilEvent)
+	if err == nil {
+		t.Fatal("expected error when appending typed-nil event, got nil")
+	}
+
+	if store.Count() != 0 {
+		t.Errorf("expected 0 events after failed typed-nil append, got %d", store.Count())
 	}
 }
